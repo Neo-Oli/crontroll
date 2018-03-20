@@ -1,0 +1,33 @@
+#compdef crontroll
+_crontroll_commands() {
+  local -a crontroll_ary
+  crontroll_ary=(
+    'status':'get status of cronjob'
+    'enable':'enable cronjob'
+    'disable':'disable cronjob'
+    'reload':'reload crontab from files in $CRONDIR'
+  )
+  _describe -t commands "crontroll commands" crontroll_ary -V crontroll_commands
+}
+local curcontext="$curcontext" state line
+_arguments -C \
+  '1: :->command' \
+  '*:: :->options'
+
+case $state in
+  (command)
+    _alternative \
+      _crontroll_commands \
+  ;;
+
+  (options)
+    local -a crontroll_cronjobs
+    local crondir=${CRONDIR:-~/.cron}
+    crontroll_cronjobs=(
+      $crondir/*(N)
+    )
+
+    crontroll_cronjobs=( ${crontroll_cronjobs#$crondir/} )
+    _describe -t cronjobs "crontroll cronjobs" crontroll_cronjobs
+  ;;
+esac

@@ -1,0 +1,60 @@
+#!/bin/sh
+crondir=${CRONDIR:-~/.cron}
+cd $crondir
+command=$1
+if [ -n "$command" ];then
+    shift
+fi
+
+checkargs(){
+    if [ -z "$1" ];then
+        >&2 echo "Not enough arguments"
+        exit 1
+    fi
+}
+
+reload_crontab(){
+    cat *|crontab -
+}
+
+comm1=`printf %.1s "$command"`
+if [ "${comm1}" = "r" ];then
+    reload_crontab
+    exit
+fi
+
+checkargs $@
+for f in "$@";do
+    if [ ! -f "$f" ];then
+        >&2 echo "$f not found"
+        exit 1
+    fi
+    filecontent="`cat $f`"
+    firstletter=`printf %.1s "$filecontent"`
+    if [ "$firstletter" = '#' ];then
+        cronjob="`echo \"${filecontent}\"|sed 's/^.//'`"
+    else
+        cronjob="${filecontent}"
+    fi
+    if [ "${comm1}" = "d" ]; then
+        donesomething=true
+        printf "#%s\n" "$cronjob" > $f
+    elif [ "${comm1}" = "e" ];then
+        donesomething=true
+        printf "%s\n" "$cronjob" > $f
+    elif [ "${comm1}" = "s" ];then
+        donesomething=true
+        if [ "$firstletter" = '#' ];then
+            status="disabled"
+        else
+            status="enabled"
+        fi
+        printf "%s: %s; %s\n" "$status" "$f" "$cronjob"
+    fi
+done
+if [ "$donesomething" = true ];then
+    reload_crontab
+else
+    checkargs $command
+    >&2 echo "Unknown command: $command"
+fi
