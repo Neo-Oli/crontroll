@@ -1,20 +1,33 @@
 #!/bin/sh
 crondir=${CRONDIR:-~/.cron}
+if [ ! -d  "$crondir" ];then
+    echo "$crondir doesn't exist yet. Set up your cron files first"
+    exit 1
+fi
 cd $crondir
 command=$1
 if [ -n "$command" ];then
     shift
 fi
 
+help(){
+    echo "Usage:"
+    echo "crontroll status <cronjob>    get status of cronjob"
+    echo "crontroll enable <cronjob>    enable cronjob"
+    echo "crontroll disable <cronjob>   disable cronjob"
+    echo "crontroll reload              reload cronjobs after adding or removing files in $crondir"
+}
+
 checkargs(){
     if [ -z "$1" ];then
         >&2 echo "Not enough arguments"
+        help
         exit 1
     fi
 }
 
 reload_crontab(){
-    cat *|crontab -
+        (cat ~/.cron/* 2>/dev/null || echo "")|crontab -
 }
 
 comm1=`printf %.1s "$command"`
