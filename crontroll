@@ -31,17 +31,17 @@ list(){
     for c in *;do
         #echo $c
         output=""
-        res="$(main status $c|cut -d: -f1)"
+        res=`main status $c|cut -d: -f1)`
         if [ "$res" = "enabled" ];then
-            output+='\033[0;32m'
-            output+="[x]"
+            output="$output\033[0;32m"
+            output="$output[x]"
         else
-            output+='\033[2m'
-            output+="[ ]"
+            output="$output\033[2m"
+            output="$output[ ]"
         fi
-        output+=" $c"
-        output+='\033[0m'
-        echo -e "$output"
+        output="$output $c"
+        output="$output\033[0m"
+        echo "$output"
     done
 }
 
