@@ -5,10 +5,6 @@ if [ ! -d  "$crondir" ];then
     exit 1
 fi
 cd $crondir
-command=$1
-if [ -n "$command" ];then
-    shift
-fi
 
 help(){
     echo "Usage:"
@@ -16,6 +12,7 @@ help(){
     echo "crontroll enable <cronjob>    enable cronjob"
     echo "crontroll disable <cronjob>   disable cronjob"
     echo "crontroll reload              reload cronjobs after adding or removing files in $crondir"
+    echo "crontroll list                list all configured cron jobs"
 }
 
 checkargs(){
@@ -27,47 +24,75 @@ checkargs(){
 }
 
 reload_crontab(){
-        (cat ~/.cron/* 2>/dev/null || echo "")|crontab -
+    (cat * 2>/dev/null || echo "")|crontab -
 }
 
-comm1=`printf %.1s "$command"`
-if [ "${comm1}" = "r" ];then
-    reload_crontab
-    exit
-fi
-
-checkargs $@
-for f in "$@";do
-    if [ ! -f "$f" ];then
-        >&2 echo "$f not found"
-        exit 1
-    fi
-    filecontent="`cat $f`"
-    firstletter=`printf %.1s "$filecontent"`
-    if [ "$firstletter" = '#' ];then
-        cronjob="`echo \"${filecontent}\"|sed 's/^.//'`"
-    else
-        cronjob="${filecontent}"
-    fi
-    if [ "${comm1}" = "d" ]; then
-        donesomething=true
-        printf "#%s\n" "$cronjob" > $f
-    elif [ "${comm1}" = "e" ];then
-        donesomething=true
-        printf "%s\n" "$cronjob" > $f
-    elif [ "${comm1}" = "s" ];then
-        donesomething=true
-        if [ "$firstletter" = '#' ];then
-            status="disabled"
+list(){
+    for c in *;do
+        #echo $c
+        output=""
+        res="$(main status $c|cut -d: -f1)"
+        if [ "$res" = "enabled" ];then
+            output+='\033[0;32m'
+            output+="[x]"
         else
-            status="enabled"
+            output+='\033[2m'
+            output+="[ ]"
         fi
-        printf "%s: %s; %s\n" "$status" "$f" "$cronjob"
+        output+=" $c"
+        output+='\033[0m'
+        echo -e "$output"
+    done
+}
+
+main(){
+    command=$1
+    if [ -n "$command" ];then
+        shift
     fi
-done
-if [ "$donesomething" = true ];then
-    reload_crontab
-else
-    checkargs $command
-    >&2 echo "Unknown command: $command"
-fi
+    comm1=`printf %.1s "$command"`
+    if [ "${comm1}" = "r" ];then
+        reload_crontab
+        exit
+    elif [ "${comm1}" = "l" ];then
+        list
+        exit
+    fi
+    checkargs $@
+    for f in "$@";do
+        if [ ! -f "$f" ];then
+            >&2 echo "$f not found"
+            exit 1
+        fi
+        filecontent="`cat $f`"
+        firstletter=`printf %.1s "$filecontent"`
+        if [ "$firstletter" = '#' ];then
+            cronjob="`echo \"${filecontent}\"|sed 's/^.//'`"
+        else
+            cronjob="${filecontent}"
+        fi
+        if [ "${comm1}" = "d" ]; then
+            donesomething=true
+            printf "#%s\n" "$cronjob" > $f
+        elif [ "${comm1}" = "e" ];then
+            donesomething=true
+            printf "%s\n" "$cronjob" > $f
+        elif [ "${comm1}" = "s" ];then
+            donesomething=true
+            if [ "$firstletter" = '#' ];then
+                status="disabled"
+            else
+                status="enabled"
+            fi
+            printf "%s: %s; %s\n" "$status" "$f" "$cronjob"
+        fi
+    done
+    if [ "$donesomething" = true ];then
+        reload_crontab
+    else
+        checkargs $command
+        >&2 echo "Unknown command: $command"
+    fi
+}
+
+main $@

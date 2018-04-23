@@ -6,6 +6,7 @@ _crontroll_commands() {
     'enable':'enable cronjob'
     'disable':'disable cronjob'
     'reload':'reload crontab from files in $CRONDIR'
+    'list':'List all cron jobs and if they are enabled or disabled in a pretty list'
   )
   _describe -t commands "crontroll commands" crontroll_ary -V crontroll_commands
 }
