@@ -33,14 +33,20 @@ list(){
         output=""
         res=`main status $c|cut -d: -f1)`
         if [ "$res" = "enabled" ];then
-            output="$output\033[0;32m"
+            if [ -t 1 ] ;then
+                output="$output\033[0;32m"
+            fi
             output="$output[x]"
         else
-            output="$output\033[2m"
+            if [ -t 1 ] ;then
+                output="$output\033[2m"
+            fi
             output="$output[ ]"
         fi
         output="$output $c"
-        output="$output\033[0m"
+        if [ -t 1 ] ;then
+            output="$output\033[0m"
+        fi
         echo "$output"
     done
 }
