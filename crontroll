@@ -30,7 +30,6 @@ reload_crontab(){
 list(){
     if [ -n "`ls`" ];then
         for c in *;do
-            #echo $c
             output=""
             res=`main status $c|cut -d: -f1)`
             if [ "$res" = "enabled" ];then
