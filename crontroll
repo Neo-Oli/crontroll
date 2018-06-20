@@ -28,27 +28,29 @@ reload_crontab(){
 }
 
 list(){
-    for c in *;do
-        #echo $c
-        output=""
-        res=`main status $c|cut -d: -f1)`
-        if [ "$res" = "enabled" ];then
-            if [ -t 1 ] ;then
-                output="$output\033[0;32m"
+    if [ -n "`ls`" ];then
+        for c in *;do
+            #echo $c
+            output=""
+            res=`main status $c|cut -d: -f1)`
+            if [ "$res" = "enabled" ];then
+                if [ -t 1 ] ;then
+                    output="$output\033[0;32m"
+                fi
+                output="$output[x]"
+            else
+                if [ -t 1 ] ;then
+                    output="$output\033[2m"
+                fi
+                output="$output[ ]"
             fi
-            output="$output[x]"
-        else
+            output="$output $c"
             if [ -t 1 ] ;then
-                output="$output\033[2m"
+                output="$output\033[0m"
             fi
-            output="$output[ ]"
-        fi
-        output="$output $c"
-        if [ -t 1 ] ;then
-            output="$output\033[0m"
-        fi
-        echo "$output"
-    done
+            echo "$output"
+        done
+    fi
 }
 
 main(){
