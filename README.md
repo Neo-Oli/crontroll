@@ -1,6 +1,6 @@
 # crontroll
 
-A cronjob controller written in bash. Treat cronjobs similar services and enable or disable them from the command line.
+A cronjob controller written in bash. Treat cronjobs similar to services and enable or disable them from the command line.
 
 # Examples
 
