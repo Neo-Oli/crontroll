@@ -1,5 +1,6 @@
 #!/bin/sh
 crondir=${CRONDIR:-~/.cron}
+logdir=${CRONLOGDIR:-~/.logs/cronjobs/}
 if [ ! -d  "$crondir" ];then
     echo "$crondir doesn't exist yet. Set up your cron files first"
     exit 1
@@ -24,7 +25,14 @@ checkargs(){
 }
 
 reload_crontab(){
-    (cat * 2>/dev/null || echo "")|crontab -
+    mkdir -p $logdir
+    if ls * 1> /dev/null 2>&1; then
+        for f in *;do
+            data="`cat $f`"
+            echo "$data | tee $logdir/$f"
+        done
+    fi|crontab -
+    #(cat * 2>/dev/null || echo "")|crontab -
 }
 
 list(){
