@@ -25,3 +25,8 @@ Instead of writing directly to your crontab file, create a file per cronjob in `
 ```
 
 Then run `crontroll reload` to enable your new cronjob.
+
+
+## Logging
+
+Each cronjob will create a logfile at `~/.logs/cronjobs/`
