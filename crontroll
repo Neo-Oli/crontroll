@@ -1,5 +1,6 @@
 #!/bin/sh
 crondir=${CRONDIR:-~/.cron}
+logdir=${CRONLOGDIR:-~/.logs/cronjobs}
 if [ ! -d  "$crondir" ];then
     echo "$crondir doesn't exist yet. Set up your cron files first"
     exit 1
@@ -24,7 +25,13 @@ checkargs(){
 }
 
 reload_crontab(){
-    (cat * 2>/dev/null || echo "")|crontab -
+    mkdir -p $logdir
+    if ls * 1> /dev/null 2>&1; then
+        for f in *;do
+            data="`cat $f`"
+            echo "$data 2>&1 >> $logdir/$f"
+        done
+    fi|crontab -
 }
 
 list(){
@@ -81,9 +88,11 @@ main(){
         if [ "${comm1}" = "d" ]; then
             donesomething=true
             printf "#%s\n" "$cronjob" > $f
+            reload_crontab
         elif [ "${comm1}" = "e" ];then
             donesomething=true
             printf "%s\n" "$cronjob" > $f
+            reload_crontab
         elif [ "${comm1}" = "s" ];then
             donesomething=true
             if [ "$firstletter" = '#' ];then
@@ -94,9 +103,7 @@ main(){
             printf "%s: %s; %s\n" "$status" "$f" "$cronjob"
         fi
     done
-    if [ "$donesomething" = true ];then
-        reload_crontab
-    else
+    if ! $donesomething;then
         checkargs $command
         >&2 echo "Unknown command: $command"
     fi
