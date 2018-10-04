@@ -1,6 +1,14 @@
 #!/bin/sh
-crondir=${CRONDIR:-~/.cron}
-logdir=${CRONLOGDIR:-~/.logs/cronjobs}
+if [ -z "${CRONDIR}" ];then
+    crondir="$HOME/.cron"
+else
+    crondir="${CRONDIR}"
+fi
+if [ -z "${CRONLOGDIR}" ];then
+    logdir="$HOME/.logs/cronjobs"
+else
+    logdir="${CRONLOGDIR}"
+fi
 if [ ! -d  "$crondir" ];then
     echo "$crondir doesn't exist yet. Set up your cron files first"
     exit 1
