@@ -13,6 +13,12 @@ if [ ! -d  "$crondir" ];then
     echo "$crondir doesn't exist yet. Set up your cron files first"
     exit 1
 fi
+
+logcommand=" 2>&1 | awk '{ print strftime(\"%%Y-%%m-%%d %%H:%%M:%%S\"), \$0;}' >> %s/current"
+if command -v svlogd  > /dev/null;then
+    logcommand=" | svlogd -tt %s"
+fi
+
 cd $crondir
 
 help(){
@@ -36,8 +42,11 @@ reload_crontab(){
     mkdir -p $logdir
     if ls * 1> /dev/null 2>&1; then
         for f in *;do
+            mkdir -p "$logdir/$f"
             data="`cat $f`"
-            echo "$data >>$logdir/$f.log 2>&1"
+            echo -n "$data"
+            printf "$logcommand" "$logdir/$f"
+            echo
         done
     fi|crontab -
 }
