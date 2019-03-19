@@ -37,7 +37,7 @@ reload_crontab(){
     if ls * 1> /dev/null 2>&1; then
         for f in *;do
             data="`cat $f`"
-            echo "$data >>$logdir/$f 2>&1"
+            echo "$data >>$logdir/$f.log 2>&1"
         done
     fi|crontab -
 }
