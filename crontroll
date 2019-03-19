@@ -16,7 +16,7 @@ fi
 
 logcommand=" 2>&1 | awk '{ print strftime(\"%%Y-%%m-%%d %%H:%%M:%%S\"), \$0;}' >> %s/current"
 if command -v svlogd  > /dev/null;then
-    logcommand=" | svlogd -tt %s"
+    logcommand=" 2>&1 | svlogd -tt %s"
 fi
 
 cd $crondir
