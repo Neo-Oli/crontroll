@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 if [ -z "${CRONDIR}" ];then
     crondir="$HOME/.cron"
 else
