@@ -1,4 +1,13 @@
 #!/bin/sh
+banner="\
+#                                    ▗▄▖  ▗▄▖
+#                      ▐▌            ▝▜▌  ▝▜▌
+#  ▟██▖ █▟█▌ ▟█▙ ▐▙██▖▐███  █▟█▌ ▟█▙  ▐▌   ▐▌
+# ▐▛  ▘ █▘  ▐▛ ▜▌▐▛ ▐▌ ▐▌   █▘  ▐▛ ▜▌ ▐▌   ▐▌
+# ▐▌    █   ▐▌ ▐▌▐▌ ▐▌ ▐▌   █   ▐▌ ▐▌ ▐▌   ▐▌
+# ▝█▄▄▌ █   ▝█▄█▘▐▌ ▐▌ ▐▙▄  █   ▝█▄█▘ ▐▙▄  ▐▙▄
+#  ▝▀▀  ▀    ▝▀▘ ▝▘ ▝▘  ▀▀  ▀    ▝▀▘   ▀▀   ▀▀
+#"
 set -e
 if [ -z "${CRONDIR}" ];then
     crondir="$HOME/.cron"
@@ -42,12 +51,16 @@ checkargs(){
 reload_crontab(){
     mkdir -p $logdir
     if ls * 1> /dev/null 2>&1; then
+        echo "$banner"
+        echo "# This crontab is managed by crontroll. Do not edit it manually, as it will get overwritten"
+        echo -n "\n\n\n"
         for f in *;do
             mkdir -p "$logdir/$f"
             data="`cat $f`"
+            echo "# $f"
             echo -n "$data"
             printf "$logcommand" "$logdir/$f"
-            echo
+            echo "\n"
         done
     fi|crontab -
 }
