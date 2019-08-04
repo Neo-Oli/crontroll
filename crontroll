@@ -129,7 +129,7 @@ main(){
             donesomething=true
             command=`cut -d" " -f6- < $f`
             command="$command `printf "$logcommand" "$logdir/$f"`"
-            eval "$command"
+            eval "$command" &
         elif [ "${comm1}" = "s" ];then
             donesomething=true
             if [ "$firstletter" = '#' ];then
