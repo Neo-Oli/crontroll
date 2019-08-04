@@ -61,7 +61,7 @@ reload_crontab(){
             echo "# $f"
             echo -n "$data"
             printf "$logcommand" "$logdir/$f"
-            echo "\n"
+            echo
         done
     fi|crontab -
 }
