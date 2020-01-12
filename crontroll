@@ -19,6 +19,12 @@ if [ -z "${CRONLOGDIR}" ];then
 else
     logdir="${CRONLOGDIR}"
 fi
+
+if [ -z "${CRONLOCKDIR}" ];then
+    lockdir="$HOME/.local/share/cronjobs-locks"
+else
+    lockdir="${CRONLOCKDIR}"
+fi
 if [ ! -d  "$crondir" ];then
     echo "$crondir doesn't exist yet. Set up your cron files first"
     exit 1
@@ -39,6 +45,8 @@ help(){
     echo "crontroll reload              reload cronjobs after adding or removing files in $crondir"
     echo "crontroll list                list all configured cron jobs"
     echo "crontroll now <cronjob>       run cronjob now"
+    echo "crontroll lock <cronjob>      lock a cronjob before running it (used internally)"
+    echo "crontroll unlock <cronjob>    unlock a cronjob after running it (used internally)"
 }
 
 checkargs(){
@@ -48,24 +56,53 @@ checkargs(){
         exit 1
     fi
 }
-
+get_command(){
+    cron_command=`cut -d" " -f6- < "$1"`
+    echo -n "crontroll lock '$1' && ("
+    echo -n "$cron_command"
+    printf "$logcommand" "$logdir/$f"
+    echo -n "; crontroll unlock '$1' )"
+    echo
+}
 reload_crontab(){
     mkdir -p $logdir
+    mkdir -p $lockdir
     if ls * 1> /dev/null 2>&1; then
         echo "$banner"
         echo "# This crontab is managed by crontroll. Do not edit it manually, as it will get overwritten"
         echo -n "\n\n\n"
         for f in *;do
             mkdir -p "$logdir/$f"
-            data="`cat $f`"
             echo "# $f"
-            echo -n "$data"
-            printf "$logcommand" "$logdir/$f"
-            echo
+            echo -n "`cut -d" " -f1-5 < "$f"` "
+            get_command "$f"
         done
     fi|crontab -
 }
 
+
+
+error(){
+   >&2 echo "$1"
+   exit $2
+}
+
+lock(){
+    lock="$lockdir/$1.lock"
+    if islocked "$1";then
+        error "Failed to lock $1" 170
+    fi
+    mkdir "$lock"
+
+}
+unlock(){
+    lock="$lockdir/$1.lock"
+    islocked $1 && rmdir "$lock"
+}
+islocked(){
+    lock="$lockdir/$1.lock"
+    [ -d "$lock" ]
+}
 list(){
     if [ -n "`ls`" ];then
         for c in *;do
@@ -96,11 +133,10 @@ main(){
     if [ -n "$command" ];then
         shift
     fi
-    comm1=`printf %.1s "$command"`
-    if [ "${comm1}" = "r" ];then
+    if [ "${command}" = "reload" ];then
         reload_crontab
         exit
-    elif [ "${comm1}" = "l" ];then
+    elif [ "${command}" = "list" ];then
         list
         exit
     fi
@@ -117,20 +153,25 @@ main(){
         else
             cronjob="${filecontent}"
         fi
-        if [ "${comm1}" = "d" ]; then
+        if [ "${command}" = "disable" ]; then
             donesomething=true
             printf "#%s\n" "$cronjob" > $f
             reload_crontab
-        elif [ "${comm1}" = "e" ];then
+        elif [ "${command}" = "enable" ];then
             donesomething=true
             printf "%s\n" "$cronjob" > $f
             reload_crontab
-        elif [ "${comm1}" = "n" ];then
+        elif [ "${command}" = "now" ];then
             donesomething=true
-            command=`cut -d" " -f6- < $f`
-            command="$command `printf "$logcommand" "$logdir/$f"`"
-            eval "$command" &
-        elif [ "${comm1}" = "s" ];then
+            cronjob="`get_command "$f"`"
+            eval "$cronjob" &
+        elif [ "${command}" = "lock" ];then
+            donesomething=true
+            lock "$f"
+        elif [ "${command}" = "unlock" ];then
+            donesomething=true
+            unlock "$f"
+        elif [ "${command}" = "status" ];then
             donesomething=true
             if [ "$firstletter" = '#' ];then
                 status="disabled"
