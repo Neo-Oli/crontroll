@@ -163,8 +163,12 @@ main(){
             reload_crontab
         elif [ "${command}" = "now" ];then
             donesomething=true
-            cronjob="`get_command "$f"`"
-            eval "$cronjob" &
+            if ! islocked $f;then
+                cronjob="`get_command "$f"`"
+                eval "$cronjob" &
+            else
+                error "Failed to lock $f" 170
+            fi
         elif [ "${command}" = "lock" ];then
             donesomething=true
             lock "$f"
