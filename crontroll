@@ -57,11 +57,12 @@ checkargs(){
     fi
 }
 get_command(){
+    lock="$lockdir/$1.lock"
     cron_command=`cut -d" " -f6- < "$1"`
-    echo -n "crontroll lock '$1' && ("
+    echo -n "mkdir \"$lock\" && ("
     echo -n "$cron_command"
     printf "$logcommand" "$logdir/$f"
-    echo -n "; crontroll unlock '$1' )"
+    echo -n "; rmdir \"$lock\" )"
     echo
 }
 reload_crontab(){
@@ -80,29 +81,11 @@ reload_crontab(){
     fi|crontab -
 }
 
-
-
 error(){
    >&2 echo "$1"
    exit $2
 }
 
-lock(){
-    lock="$lockdir/$1.lock"
-    if islocked "$1";then
-        error "Failed to lock $1" 170
-    fi
-    mkdir "$lock"
-
-}
-unlock(){
-    lock="$lockdir/$1.lock"
-    islocked $1 && rmdir "$lock"
-}
-islocked(){
-    lock="$lockdir/$1.lock"
-    [ -d "$lock" ]
-}
 list(){
     if [ -n "`ls`" ];then
         for c in *;do
@@ -163,7 +146,8 @@ main(){
             reload_crontab
         elif [ "${command}" = "now" ];then
             donesomething=true
-            if ! islocked $f;then
+            lock="$lockdir/$1.lock"
+            if [ ! -d "$lock" ];then
                 cronjob="`get_command "$f"`"
                 eval "$cronjob" &
             else
