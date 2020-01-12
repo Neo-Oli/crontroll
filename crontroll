@@ -45,8 +45,6 @@ help(){
     echo "crontroll reload              reload cronjobs after adding or removing files in $crondir"
     echo "crontroll list                list all configured cron jobs"
     echo "crontroll now <cronjob>       run cronjob now"
-    echo "crontroll lock <cronjob>      lock a cronjob before running it (used internally)"
-    echo "crontroll unlock <cronjob>    unlock a cronjob after running it (used internally)"
 }
 
 checkargs(){
