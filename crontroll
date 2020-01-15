@@ -58,7 +58,9 @@ get_command(){
     lock="$lockdir/$1.lock"
     cron_command=`cut -d" " -f6- < "$1"`
     echo -n "mkdir \"$lock\" && ("
-    echo -n "$cron_command"
+    echo -n "(echo starting cronjob;"
+    echo -n "$cron_command;"
+    echo -n "echo cronjob finished;)"
     printf "$logcommand" "$logdir/$f"
     echo -n "; rmdir \"$lock\" )"
     echo
