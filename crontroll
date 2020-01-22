@@ -149,6 +149,8 @@ main(){
             lock="$lockdir/$1.lock"
             if [ ! -d "$lock" ];then
                 cronjob="`get_command "$f"`"
+                # set CRONJOB_FORCE so users can check if we're running naturally or forced
+                export CRONJOB_FORCE=1
                 eval "$cronjob" &
             else
                 error "Failed to lock $f" 170
