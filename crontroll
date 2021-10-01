@@ -166,12 +166,6 @@ main(){
             else
                 error "Failed to lock $f" 170
             fi
-        elif [ "${command}" = "lock" ];then
-            donesomething=true
-            lock "$f"
-        elif [ "${command}" = "unlock" ];then
-            donesomething=true
-            unlock "$f"
         elif [ "${command}" = "status" ];then
             donesomething=true
             if [ "$firstletter" = '#' ];then
