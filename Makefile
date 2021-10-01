@@ -8,4 +8,7 @@ install: crontroll
 uninstall:
 	rm -f $(PREFIX)/bin/crontroll
 
-.PHONY: install uninstall
+lint:
+	npx --package=prettier-plugin-sh prettier --write crontroll
+
+.PHONY: install uninstall lint
