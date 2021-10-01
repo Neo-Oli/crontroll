@@ -9,35 +9,35 @@ banner="\
 #  ▝▀▀  ▀    ▝▀▘ ▝▘ ▝▘  ▀▀  ▀    ▝▀▘   ▀▀   ▀▀
 #"
 set -e
-if [ -z "${CRONDIR}" ];then
+if [ -z "${CRONDIR}" ]; then
     crondir="$HOME/.cron"
 else
     crondir="${CRONDIR}"
 fi
-if [ -z "${CRONLOGDIR}" ];then
+if [ -z "${CRONLOGDIR}" ]; then
     logdir="$HOME/.logs/cronjobs"
 else
     logdir="${CRONLOGDIR}"
 fi
 
-if [ -z "${CRONLOCKDIR}" ];then
+if [ -z "${CRONLOCKDIR}" ]; then
     lockdir="$HOME/.local/share/cronjobs-locks"
 else
     lockdir="${CRONLOCKDIR}"
 fi
-if [ ! -d  "$crondir" ];then
+if [ ! -d "$crondir" ]; then
     echo "$crondir doesn't exist yet. Set up your cron files first"
     exit 1
 fi
 
 logcommand=" 2>&1 | awk '{ print strftime(\"%%Y-%%m-%%d %%H:%%M:%%S\"), \$0;}' >> %s/current"
-if command -v svlogd  > /dev/null;then
+if command -v svlogd > /dev/null; then
     logcommand=" 2>&1 | svlogd -tt %s"
 fi
 
 cd $crondir
 
-help(){
+help() {
     echo "Usage:"
     echo "crontroll status <cronjob>    get status of cronjob"
     echo "crontroll enable <cronjob>    enable cronjob"
@@ -48,16 +48,16 @@ help(){
     echo "crontroll now_force <cronjob> run cronjob now, even if it is disabled"
 }
 
-checkargs(){
-    if [ -z "$1" ];then
-        >&2 echo "Not enough arguments"
+checkargs() {
+    if [ -z "$1" ]; then
+        echo >&2 "Not enough arguments"
         help
         exit 1
     fi
 }
-get_command(){
+get_command() {
     lock="$lockdir/$1.lock"
-    cron_command=`cut -d" " -f6- < "$1"`
+    cron_command=$(cut -d" " -f6- < "$1")
     echo -n " sh -c '"
     echo -n "if ! kill -s 0 \`cat \"$lock\" 2>/dev/null\` 2>/dev/null; then "
     echo -n "echo \$\$ > \"$lock\" && "
@@ -73,45 +73,45 @@ get_command(){
     echo -n "'"
     echo
 }
-reload_crontab(){
+reload_crontab() {
     mkdir -p $logdir
     mkdir -p $lockdir
     if ls * 1> /dev/null 2>&1; then
         echo "$banner"
         echo "# This crontab is managed by crontroll. Do not edit it manually, as it will get overwritten"
         echo -n "\n\n\n"
-        for f in *;do
+        for f in *; do
             mkdir -p "$logdir/$f"
             echo "# $f"
-            echo -n "`cut -d" " -f1-5 < "$f"` "
+            echo -n "$(cut -d" " -f1-5 < "$f") "
             get_command "$f"
         done
-    fi|crontab -
+    fi | crontab -
 }
 
-error(){
-   >&2 echo "$1"
-   exit $2
+error() {
+    echo >&2 "$1"
+    exit $2
 }
 
-list(){
-    if [ -n "`ls`" ];then
-        for c in *;do
+list() {
+    if [ -n "$(ls)" ]; then
+        for c in *; do
             output=""
-            res=`main status $c|cut -d: -f1`
-            if [ "$res" = "enabled" ];then
-                if [ -t 1 ] ;then
+            res=$(main status $c | cut -d: -f1)
+            if [ "$res" = "enabled" ]; then
+                if [ -t 1 ]; then
                     output="$output\033[0;32m"
                 fi
                 output="$output[x]"
             else
-                if [ -t 1 ] ;then
+                if [ -t 1 ]; then
                     output="$output\033[2m"
                 fi
                 output="$output[ ]"
             fi
             output="$output $c"
-            if [ -t 1 ] ;then
+            if [ -t 1 ]; then
                 output="$output\033[0m"
             fi
             printf "$output\n"
@@ -119,28 +119,28 @@ list(){
     fi
 }
 
-main(){
+main() {
     command=$1
-    if [ -n "$command" ];then
+    if [ -n "$command" ]; then
         shift
     fi
-    if [ "${command}" = "reload" ];then
+    if [ "${command}" = "reload" ]; then
         reload_crontab
         exit
-    elif [ "${command}" = "list" ];then
+    elif [ "${command}" = "list" ]; then
         list
         exit
     fi
     checkargs $@
-    for f in "$@";do
-        if [ ! -f "$f" ];then
-            >&2 echo "$f not found"
+    for f in "$@"; do
+        if [ ! -f "$f" ]; then
+            echo >&2 "$f not found"
             exit 1
         fi
-        filecontent="`cat $f`"
-        firstletter=`printf %.1s "$filecontent"`
-        if [ "$firstletter" = '#' ];then
-            cronjob="`echo \"${filecontent}\"|sed 's/^.//'`"
+        filecontent="$(cat $f)"
+        firstletter=$(printf %.1s "$filecontent")
+        if [ "$firstletter" = '#' ]; then
+            cronjob="$(echo \"${filecontent}\" | sed 's/^.//')"
         else
             cronjob="${filecontent}"
         fi
@@ -148,27 +148,27 @@ main(){
             donesomething=true
             printf "#%s\n" "$cronjob" > $f
             reload_crontab
-        elif [ "${command}" = "enable" ];then
+        elif [ "${command}" = "enable" ]; then
             donesomething=true
             printf "%s\n" "$cronjob" > $f
             reload_crontab
-        elif [ "${command}" = "now" ] || [ "${command}" = "now_force" ];then
+        elif [ "${command}" = "now" ] || [ "${command}" = "now_force" ]; then
             donesomething=true
             lock="$lockdir/$1.lock"
-            if [ "$firstletter" = '#' ] && [ "${command}" != "now_force" ];then
+            if [ "$firstletter" = '#' ] && [ "${command}" != "now_force" ]; then
                 error 'Command is disabled, run `crontroll now_force $f` to run anyway' 1
             fi
-            if [ ! -d "$lock" ];then
-                cronjob="`get_command "$f"`"
+            if [ ! -d "$lock" ]; then
+                cronjob="$(get_command "$f")"
                 # set CRONJOB_FORCE so users can check if we're running naturally or forced
                 export CRONJOB_FORCE=1
                 eval "$cronjob" &
             else
                 error "Failed to lock $f" 170
             fi
-        elif [ "${command}" = "status" ];then
+        elif [ "${command}" = "status" ]; then
             donesomething=true
-            if [ "$firstletter" = '#' ];then
+            if [ "$firstletter" = '#' ]; then
                 status="disabled"
             else
                 status="enabled"
@@ -176,9 +176,9 @@ main(){
             printf "%s: %s; %s\n" "$status" "$f" "$cronjob"
         fi
     done
-    if ! $donesomething;then
+    if ! $donesomething; then
         checkargs $command
-        >&2 echo "Unknown command: $command"
+        echo >&2 "Unknown command: $command"
     fi
 }
 
