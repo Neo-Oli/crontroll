@@ -140,7 +140,7 @@ main() {
         filecontent="$(cat $f)"
         firstletter=$(printf %.1s "$filecontent")
         if [ "$firstletter" = '#' ]; then
-            cronjob="$(echo \"${filecontent}\" | sed 's/^.//')"
+            cronjob="$(echo "${filecontent}" | sed 's/^.//')"
         else
             cronjob="${filecontent}"
         fi
