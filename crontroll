@@ -160,8 +160,12 @@ main() {
             fi
             if [ ! -d "$lock" ]; then
                 cronjob="$(get_command "$f")"
-                # set CRONJOB_FORCE so users can check if we're running naturally or forced
-                export CRONJOB_FORCE=1
+                # set CRONJOB_NOW so users can check if we're running naturally or with crontroll now
+                export CRONJOB_NOW=1
+                if [ "${command}" = "now_force" ]; then
+                    # set CRONJOB_FORCE so users can check if we're running with now_force
+                    export CRONJOB_FORCE=1
+                fi
                 eval "$cronjob" &
             else
                 error "Failed to lock $f" 170
