@@ -156,7 +156,7 @@ main() {
             donesomething=true
             lock="$lockdir/$1.lock"
             if [ "$firstletter" = '#' ] && [ "${command}" != "now_force" ]; then
-                error 'Command is disabled, run `crontroll now_force $f` to run anyway' 1
+                error "Command is disabled, run \`crontroll now_force $f\` to run anyway" 1
             fi
             if [ ! -d "$lock" ]; then
                 cronjob="$(get_command "$f")"
