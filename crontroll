@@ -59,6 +59,7 @@ get_command() {
     lock="$lockdir/$1.lock"
     cron_command=$(cut -d" " -f6- < "$1")
     echo -n " sh -c '"
+    echo -n "export CRONJOB=1;"
     echo -n "if ! kill -s 0 \`cat \"$lock\" 2>/dev/null\` 2>/dev/null; then "
     echo -n "echo \$\$ > \"$lock\" && "
     echo -n "(echo \"starting cronjob \$\$\";"
