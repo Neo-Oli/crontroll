@@ -29,4 +29,4 @@ Then run `crontroll reload` to enable your new cronjob.
 
 ## Logging
 
-Each cronjob will create a logfile at `~/.logs/cronjobs/`
+Each cronjob will create a logfile at `~/.logs/cronjobs/`. This can be disabled if you create a file called ~/.cron/`.<NAME>-nolog` for each cronjob you wish to disable logging for.
