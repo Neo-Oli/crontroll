@@ -1,7 +1,7 @@
 crontroll:
 
 install: crontroll
-	sed -e '1s|#!.*/sh|#!$(shell which sh)|' \
+	sed -e '1s|#!.*/bash|#!$(shell which bash)|' \
 		crontroll > $(PREFIX)/bin/crontroll
 		chmod +x $(PREFIX)/bin/crontroll
 
