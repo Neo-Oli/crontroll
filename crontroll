@@ -35,7 +35,7 @@ if command -v svlogd > /dev/null; then
     logcommand=" 2>&1 | svlogd -tt %s"
 fi
 
-cd $crondir
+cd "$crondir"
 
 help() {
     echo "Usage:"
@@ -78,12 +78,12 @@ get_command() {
     echo
 }
 reload_crontab() {
-    mkdir -p $logdir
-    mkdir -p $lockdir
+    mkdir -p "$logdir"
+    mkdir -p "$lockdir"
     if ls * 1> /dev/null 2>&1; then
         echo "$banner"
         echo "# This crontab is managed by crontroll. Do not edit it manually, as it will get overwritten"
-        echo -n "\n\n\n"
+        echo -en "\n\n\n"
         for f in *; do
             mkdir -p "$logdir/$f"
             echo "# $f"
@@ -95,14 +95,14 @@ reload_crontab() {
 
 error() {
     echo >&2 "$1"
-    exit $2
+    exit "$2"
 }
 
 list() {
     if [ -n "$(ls)" ]; then
         for c in *; do
             output=""
-            res=$(main status $c | cut -d: -f1)
+            res=$(main status "$c" | cut -d: -f1)
             if [ "$res" = "enabled" ]; then
                 if [ -t 1 ]; then
                     output="$output\033[0;32m"
@@ -141,7 +141,7 @@ main() {
             echo >&2 "$f not found"
             exit 1
         fi
-        filecontent="$(cat $f)"
+        filecontent="$(cat "$f")"
         firstletter=$(printf %.1s "$filecontent")
         if [ "$firstletter" = '#' ]; then
             cronjob="$(echo "${filecontent}" | sed 's/^.//')"
@@ -150,11 +150,11 @@ main() {
         fi
         if [ "${command}" = "disable" ]; then
             donesomething=true
-            printf "#%s\n" "$cronjob" > $f
+            printf "#%s\n" "$cronjob" > "$f"
             reload_crontab
         elif [ "${command}" = "enable" ]; then
             donesomething=true
-            printf "%s\n" "$cronjob" > $f
+            printf "%s\n" "$cronjob" > "$f"
             reload_crontab
         elif [ "${command}" = "now" ] || [ "${command}" = "now_force" ]; then
             donesomething=true
@@ -185,7 +185,7 @@ main() {
         fi
     done
     if ! $donesomething; then
-        checkargs $command
+        checkargs "$command"
         echo >&2 "Unknown command: $command"
     fi
 }
