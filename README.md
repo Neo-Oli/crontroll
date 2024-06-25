@@ -15,7 +15,7 @@ $
 ```
 
 # Setting up cronjobs
-Instead of writing directly to your crontab file, create a file per cronjob in `~/.cron`.
+Instead of writing directly to your crontab file, create a file per cronjob in `~/.cron` (or `$CRONDIR`, if set).
 
 ## Example
 
@@ -29,4 +29,4 @@ Then run `crontroll reload` to enable your new cronjob.
 
 ## Logging
 
-Each cronjob will create a logfile at `~/.logs/cronjobs/`. This can be disabled if you create a file called ~/.cron/`.<NAME>-nolog` for each cronjob you wish to disable logging for.
+Each cronjob will create a logfile at `~/.logs/cronjobs/`. This can be disabled if you create a file called ~/.cron/`.<NAME>-nolog` for each cronjob you wish to disable logging for. You can also change the log dir by setting `$CRONLOGDIR`
