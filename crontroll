@@ -171,10 +171,9 @@ main() {
                     # set CRONJOB_FORCE so users can check if we're running with now_force
                     export CRONJOB_FORCE=1
                 fi
+                eval "$cronjob" &
                 if [ "${command}" = "now_wait" ]; then
-                    eval "$cronjob"
-                else
-                    eval "$cronjob" &
+                    wait
                 fi
             else
                 error "Failed to lock $f" 170
