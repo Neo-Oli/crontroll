@@ -46,6 +46,7 @@ help() {
     echo "crontroll list                list all configured cron jobs"
     echo "crontroll now <cronjob>       run cronjob now"
     echo "crontroll now_force <cronjob> run cronjob now, even if it is disabled"
+    echo "crontroll now_wait <cronjob>  run cronjob now, even if it is disabled, and wait until it finishes"
 }
 
 checkargs() {
@@ -156,10 +157,10 @@ main() {
             donesomething=true
             printf "%s\n" "$cronjob" > "$f"
             reload_crontab
-        elif [ "${command}" = "now" ] || [ "${command}" = "now_force" ]; then
+        elif [ "${command}" = "now" ] || [ "${command}" = "now_force" ] || [ "${command}" = "now_wait" ]; then
             donesomething=true
             lock="$lockdir/$1.lock"
-            if [ "$firstletter" = '#' ] && [ "${command}" != "now_force" ]; then
+            if [ "$firstletter" = '#' ] && [ "${command}" == "now" ]; then
                 error "Command is disabled, run \`crontroll now_force $f\` to run anyway" 1
             fi
             if [ ! -d "$lock" ]; then
@@ -170,7 +171,11 @@ main() {
                     # set CRONJOB_FORCE so users can check if we're running with now_force
                     export CRONJOB_FORCE=1
                 fi
-                eval "$cronjob" &
+                if [ "${command}" = "now_wait" ]; then
+                    eval "$cronjob"
+                else
+                    eval "$cronjob" &
+                fi
             else
                 error "Failed to lock $f" 170
             fi

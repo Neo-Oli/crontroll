@@ -9,6 +9,7 @@ _crontroll_commands() {
     'list':'List all cron jobs and if they are enabled or disabled in a pretty list'
     'now':'run cronjob now'
     'now_force':'run cronjob now, even if it is disabled'
+    'now_wait':'run cronjob now, even if it is disabled, and wait until it finishes'
   )
   _describe -t commands "crontroll commands" crontroll_ary -V crontroll_commands
 }
