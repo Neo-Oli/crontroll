@@ -70,7 +70,8 @@ get_command() {
     echo -n "echo cronjob finished;)"
     # Disable logger by creating a file called .NAME-nolog
     if [ ! -f ."$1"-nolog ]; then
-        echo -n "$logcommand" "$logdir/$1"
+        #shellcheck disable=SC2059
+        printf "$logcommand" "$logdir/$1"
     fi
     echo -n "; rm \"$lock\";"
     echo -n "else "
