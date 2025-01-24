@@ -44,6 +44,7 @@ help() {
     echo "crontroll disable <cronjob>   disable cronjob"
     echo "crontroll reload              reload cronjobs after adding or removing files in $crondir"
     echo "crontroll list                list all configured cron jobs"
+    echo "crontroll crontab             list all configured cron jobs, in the format of a normal crontab"
     echo "crontroll now <cronjob>       run cronjob now"
     echo "crontroll now_force <cronjob> run cronjob now, even if it is disabled"
     echo "crontroll now_wait <cronjob>  run cronjob now, even if it is disabled, and wait until it finishes"
@@ -99,6 +100,30 @@ error() {
     exit "$2"
 }
 
+list_crontab() {
+    if [ -n "$(ls)" ]; then
+        for c in *; do
+            output=""
+            res=$(main status "$c" | cut -d: -f1)
+            if [ "$res" = "enabled" ]; then
+                if [ -t 1 ]; then
+                    output="$output\033[0;32m"
+                fi
+            else
+                if [ -t 1 ]; then
+                    output="$output\033[2m"
+                fi
+            fi
+            output="$output# $c"
+            output="$output\n$(< "$c")"
+            if [ -t 1 ]; then
+                output="$output\033[0m"
+            fi
+            echo -en "$output\n\n"
+        done
+    fi
+}
+
 list() {
     if [ -n "$(ls)" ]; then
         for c in *; do
@@ -131,6 +156,9 @@ main() {
     fi
     if [ "${command}" = "reload" ]; then
         reload_crontab
+        exit
+    elif [ "${command}" = "crontab" ]; then
+        list_crontab
         exit
     elif [ "${command}" = "list" ]; then
         list
