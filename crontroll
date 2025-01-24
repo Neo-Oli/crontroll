@@ -69,7 +69,7 @@ get_command() {
     echo -n "echo cronjob finished;)"
     # Disable logger by creating a file called .NAME-nolog
     if [ ! -f ."$1"-nolog ]; then
-        printf "$logcommand" "$logdir/$1"
+        echo -n "$logcommand" "$logdir/$1"
     fi
     echo -n "; rm \"$lock\";"
     echo -n "else "
@@ -81,7 +81,7 @@ get_command() {
 reload_crontab() {
     mkdir -p "$logdir"
     mkdir -p "$lockdir"
-    if ls * 1> /dev/null 2>&1; then
+    if ls ./* 1> /dev/null 2>&1; then
         echo "$banner"
         echo "# This crontab is managed by crontroll. Do not edit it manually, as it will get overwritten"
         echo -en "\n\n\n"
@@ -108,18 +108,18 @@ list() {
                 if [ -t 1 ]; then
                     output="$output\033[0;32m"
                 fi
-                output="$output[x]"
+                output="${output}[x]"
             else
                 if [ -t 1 ]; then
                     output="$output\033[2m"
                 fi
-                output="$output[ ]"
+                output="${output}[ ]"
             fi
             output="$output $c"
             if [ -t 1 ]; then
                 output="$output\033[0m"
             fi
-            printf "$output\n"
+            echo -en "$output\n"
         done
     fi
 }
@@ -136,7 +136,7 @@ main() {
         list
         exit
     fi
-    checkargs $@
+    checkargs "$@"
     for f in "$@"; do
         if [ ! -f "$f" ]; then
             echo >&2 "$f not found"
@@ -145,7 +145,7 @@ main() {
         filecontent="$(cat "$f")"
         firstletter=$(printf %.1s "$filecontent")
         if [ "$firstletter" = '#' ]; then
-            cronjob="$(echo "${filecontent}" | sed 's/^.//')"
+            cronjob="${filecontent#?}"
         else
             cronjob="${filecontent}"
         fi
@@ -194,4 +194,4 @@ main() {
     fi
 }
 
-main $@
+main "$@"
