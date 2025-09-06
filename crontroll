@@ -94,7 +94,7 @@ reload_crontab() {
             echo -n "$(cut -d" " -f1-5 < "$f") "
             get_command "$f"
         done
-    fi | crontab -
+    fi | crontab - > /dev/null
 }
 
 error() {
