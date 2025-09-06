@@ -60,13 +60,14 @@ checkargs() {
 get_command() {
     lock="$lockdir/$1.lock"
     cron_command=$(cut -d" " -f6- < "$1")
+    escaped_command=$(printf "%s" "$cron_command" | sed "s/'/'\\\\''/g")
     echo -n " sh -c '"
     echo -n "export CRONJOB=1;"
     echo -n "if ! kill -s 0 \`cat \"$lock\" 2>/dev/null\` 2>/dev/null; then "
     echo -n "echo \$\$ > \"$lock\" && "
     echo -n "(echo \"starting cronjob \$\$\";"
     echo -n "kill -s 0 \$\$;"
-    echo -n "$cron_command;"
+    echo -n "$escaped_command;"
     echo -n "echo cronjob finished;)"
     # Disable logger by creating a file called .NAME-nolog
     if [ ! -f ."$1"-nolog ]; then
