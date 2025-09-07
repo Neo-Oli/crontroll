@@ -167,6 +167,8 @@ main() {
         exit
     fi
     checkargs "$@"
+    donesomething=false
+    reload=false
     for f in "$@"; do
         if [ ! -f "$f" ]; then
             echo >&2 "$f not found"
@@ -181,12 +183,12 @@ main() {
         fi
         if [ "${command}" = "disable" ]; then
             donesomething=true
+            reload=true
             printf "#%s\n" "$cronjob" > "$f"
-            reload_crontab
         elif [ "${command}" = "enable" ]; then
             donesomething=true
+            reload=true
             printf "%s\n" "$cronjob" > "$f"
-            reload_crontab
         elif [ "${command}" = "now" ] || [ "${command}" = "now_force" ] || [ "${command}" = "now_wait" ]; then
             donesomething=true
             lock="$lockdir/$1.lock"
@@ -218,6 +220,9 @@ main() {
             printf "%s: %s; %s\n" "$status" "$f" "$cronjob"
         fi
     done
+    if $reload;then
+        reload_crontab
+    fi
     if ! $donesomething; then
         checkargs "$command"
         echo >&2 "Unknown command: $command"
